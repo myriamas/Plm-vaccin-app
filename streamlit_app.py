@@ -30,12 +30,13 @@ PAGES = [
     "IoT / Température",
     "Cycle de vie",
     "RFLP / Architecture",
-    "RFLP-IVV – Synthèse",
+    "RFLP-IVV - Synthèse",
     "Fonctionnel / Architecture",
     "Méthodologie IVV",
     "Archivage sécurisé",
     "Change control / Audit trail",
     "Soumission réglementaire",
+    "Conformité PV",
 ]
 
 
@@ -742,3 +743,76 @@ elif page == "Soumission réglementaire":
           associés à chaque exigence, en quelques clics.
         """
     )
+
+
+# ===========================
+# PAGE : Conformité PV / Compliance Checker
+# ===========================
+elif page == "Conformité PV":
+    st.title("Compliance Checker – Pharmacovigilance VAX-HIV-2030")
+
+    st.markdown(
+        """
+        Cette page permet de vérifier automatiquement la conformité réglementaire :
+        - 15 jours max pour les cas **graves**
+        - 90 jours max pour les cas **non graves**
+        L’outil analyse également le texte libre pour détecter des cas graves mal classés.
+        """
+    )
+
+    uploaded = st.file_uploader("Importer un fichier CSV d'effets secondaires", type=["csv"])
+
+    if uploaded:
+        df_pv = pd.read_csv(uploaded)
+
+        # Convert dates
+        df_pv["date_effet"] = pd.to_datetime(df_pv["date_effet"])
+        df_pv["date_declaration"] = pd.to_datetime(df_pv["date_declaration"])
+
+        # Compute delay
+        df_pv["delai_jours"] = (df_pv["date_declaration"] - df_pv["date_effet"]).dt.days
+
+        # Compliance rule
+        df_pv["conforme"] = df_pv.apply(
+            lambda x: "Oui" if (
+                (x["gravite"] == "Serious" and x["delai_jours"] <= 15) or
+                (x["gravite"] == "Non serious" and x["delai_jours"] <= 90)
+            ) else "Non",
+            axis=1
+        )
+
+        st.subheader("Tableau de conformité")
+        st.dataframe(df_pv, use_container_width=True, hide_index=True)
+
+        # Compliance per lot
+        st.subheader("Taux de conformité par lot")
+        df_lot = df_pv.groupby("lot")["conforme"].apply(lambda x: (x=="Oui").mean()*100)
+        st.bar_chart(df_lot)
+
+        # Heatmap
+        import seaborn as sns
+        import matplotlib.pyplot as plt
+
+        st.subheader("Heatmap des délais moyens")
+        pivot = df_pv.pivot_table(
+            values="delai_jours",
+            index="lot",
+            columns="gravite",
+            aggfunc="mean"
+        )
+
+        fig, ax = plt.subplots()
+        sns.heatmap(pivot, annot=True, cmap="Blues", ax=ax)
+        st.pyplot(fig)
+
+        # NLP keywords detection
+        keywords = ["choc", "convulsion", "paralysie", "évanouissement", "tachycardie"]
+        df_pv["grave_detecte"] = df_pv["description"].apply(
+            lambda txt: "Serious" if any(k.lower() in txt.lower() for k in keywords) else "Non serious"
+        )
+
+        st.subheader("Alignement NLP")
+        df_pv["alignement"] = df_pv.apply(
+            lambda x: "OK" if x["grave_detecte"]==x["gravite"] else "Discordant", axis=1
+        )
+        st.dataframe(df_pv[["gravite", "grave_detecte", "alignement"]])
