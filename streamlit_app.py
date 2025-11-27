@@ -3,9 +3,12 @@ from dataset import (
     df_master,
     df_rflp,
     df_lifecycle,
+    df_lifecycle_rflp,
+    df_rflp_lifecycle,
     df_archiving,
     df_audit_trail,
 )
+
 import pandas as pd
 
 # ----- App config -----
@@ -27,11 +30,14 @@ PAGES = [
     "IoT / Température",
     "Cycle de vie",
     "RFLP / Architecture",
+    "RFLP-IVV – Synthèse",
+    "Fonctionnel / Architecture",
     "Méthodologie IVV",
     "Archivage sécurisé",
     "Change control / Audit trail",
     "Soumission réglementaire",
 ]
+
 
 # ----- Session state init -----
 if "page" not in st.session_state:
@@ -416,22 +422,259 @@ elif page == "Cycle de vie":
 # RFLP / ARCHITECTURE
 # ===========================
 elif page == "RFLP / Architecture":
-    st.title("Vue RFLP – Sécurité / Qualité / Efficacité / Production")
+    st.title("RFLP – Sécurité / Qualité / Efficacité / Production")
 
-    st.subheader("Synthèse RFLP")
-    st.dataframe(df_rflp.reset_index(drop=True), use_container_width=True, hide_index=True)
-
-    st.subheader("Architecture logique (vue simplifiée)")
     st.markdown(
         """
-        1. Antigène / plateforme vaccinale  
-        2. Formulation (vecteur, adjuvant)  
-        3. Administration intramusculaire et logistique  
-        4. Réponse immunitaire (humorale + cellulaire)  
-        5. Contrôles qualité et libération des lots
+        Cette vue est organisée autour des exigences,
+        puis une architecture logique du vaccin VIH.
         """
     )
 
+    # --- Un peu de CSS pour les cartes colorées façon maquette ---
+    st.markdown(
+        """
+        <style>
+        .rflp-grid {
+            display: grid;
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+            grid-gap: 1.2rem;
+            margin-top: 1.5rem;
+            margin-bottom: 1.5rem;
+        }
+        .rflp-card {
+            padding: 1.2rem 1.4rem;
+            border-radius: 16px;
+            box-shadow: 0 2px 6px rgba(0,0,0,0.08);
+            font-size: 0.95rem;
+        }
+        .rflp-sec { background-color: #ffe5e5; }   /* Sécurité */
+        .rflp-qual { background-color: #fff0c2; }  /* Qualité */
+        .rflp-effi { background-color: #e4f9e8; }  /* Efficacité */
+        .rflp-prod { background-color: #e3f0ff; }  /* Production */
+
+        .rflp-center {
+            display: flex;
+            justify-content: center;
+            margin-bottom: 0.8rem;
+        }
+        .rflp-center-badge {
+            padding: 0.4rem 1.2rem;
+            border-radius: 999px;
+            border: 1px solid #d0d0d0;
+            background-color: #ffffff;
+            font-weight: 600;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.08);
+        }
+        </style>
+        """,
+        unsafe_allow_html=True,
+    )
+
+    # --- Bandeau central "Exigences" ---
+    st.markdown(
+        """
+        <div class="rflp-center">
+            <div class="rflp-center-badge">Exigences</div>
+        </div>
+        """,
+        unsafe_allow_html=True,
+    )
+
+    # --- 4 cartes RFLP inspirées du PDF ---
+    st.markdown('<div class="rflp-grid">', unsafe_allow_html=True)
+
+    st.markdown(
+        """
+        <div class="rflp-card rflp-sec">
+            <strong>Sécurité</strong>
+            <ul>
+                <li>Évaluer le risque d’ADE</li>
+                <li>Sécurité à long terme</li>
+            </ul>
+        </div>
+        """,
+        unsafe_allow_html=True,
+    )
+
+    st.markdown(
+        """
+        <div class="rflp-card rflp-qual">
+            <strong>Qualité</strong>
+            <ul>
+                <li>Contrôle de stérilité</li>
+                <li>Validation des tests</li>
+            </ul>
+        </div>
+        """,
+        unsafe_allow_html=True,
+    )
+
+    st.markdown(
+        """
+        <div class="rflp-card rflp-effi">
+            <strong>Efficacité</strong>
+            <ul>
+                <li>Immunité complète</li>
+                <li>Test sur plusieurs variants</li>
+                <li>Corrélats de protection</li>
+            </ul>
+        </div>
+        """,
+        unsafe_allow_html=True,
+    )
+
+    st.markdown(
+        """
+        <div class="rflp-card rflp-prod">
+            <strong>Production</strong>
+            <ul>
+                <li>Règles GMP</li>
+                <li>Processus solide</li>
+                <li>Traçabilité complète</li>
+            </ul>
+        </div>
+        """,
+        unsafe_allow_html=True,
+    )
+
+    st.markdown("</div>", unsafe_allow_html=True)
+
+    st.markdown("---")
+    st.subheader("Architecture logique du vaccin")
+
+    # --- Schéma logique façon bloc-diagramme ---
+    graph_code = """
+    digraph G {
+        rankdir=LR;
+        nodesep=0.6;
+        ranksep=0.8;
+        size="14,3!";
+        ratio=fill;
+
+        node [
+            shape=box,
+            style="rounded,filled",
+            fillcolor="#f5f5f5",
+            fontsize=14,
+            width=3,
+            height=1
+        ];
+
+        Besoins   [label="Besoins médicaux\nRéférentiels FDA/EMA"];
+        RD        [label="R&D\nPréclinique / Design"];
+        Clinique  [label="Clinique\nEssais I–III"];
+        Qualite   [label="Qualité / Production\nCMC, GMP, Libération"];
+        Reg       [label="Réglementaire\nCTD, AMM"];
+        PostAMM   [label="Post-AMM\nPV, archivage, change control"];
+
+        Besoins -> RD -> Clinique -> Qualite -> Reg -> PostAMM;
+    }
+    """
+    st.graphviz_chart(graph_code)
+
+
+    st.markdown(
+        """
+        Cette vue montre comment les blocs fonctionnels (antigène, vecteur, adjuvant, injection)
+        mènent à une **réponse immunitaire contrôlée** avec un **contrôle qualité** en bout de chaîne.
+        """
+    )
+
+# ===========================
+# RFLP-IVV – SYNTHESE
+# ===========================
+elif page == "RFLP-IVV – Synthèse":
+    st.title("RFLP-IVV – Synthèse du jumeau réglementaire")
+
+    st.markdown(
+        """
+        Cette vue reprend la logique du rapport de hackathon :  
+        **RFLP** pour structurer *Sécurité, Qualité, Efficacité, Production* et  
+        **IVV** pour montrer comment ces exigences vivent sur tout le cycle de vie.
+        """
+    )
+
+    col_left, col_right = st.columns([1, 2])
+
+    with col_left:
+        st.subheader("Piliers RFLP")
+        st.dataframe(
+            df_rflp.reset_index(drop=True),
+            use_container_width=True,
+            hide_index=True,
+        )
+
+    with col_right:
+        st.subheader("Cycle de vie en 8 étapes (vue PLM)")
+        st.dataframe(
+            df_lifecycle_rflp.sort_values("Ordre").reset_index(drop=True),
+            use_container_width=True,
+            hide_index=True,
+        )
+
+    st.markdown("### Matrice Exigences (RFLP) × Cycle de vie (8 étapes)")
+    st.write(
+        "Cette matrice montre, pour chaque pilier, comment les exigences s'expriment à chaque étape du cycle de vie."
+    )
+    st.dataframe(
+        df_rflp_lifecycle.reset_index(drop=True),
+        use_container_width=True,
+        hide_index=True,
+    )
+
+
+# ===========================
+# FONCTIONNEL / ARCHITECTURE
+# ===========================
+elif page == "Fonctionnel / Architecture":
+    st.title("Vue fonctionnelle et architecture logique du vaccin VIH")
+
+    col_func, col_arch = st.columns(2)
+
+    with col_func:
+        st.subheader("Analyse fonctionnelle du vaccin")
+        st.markdown(
+            """
+            - Répondre à un **besoin médical** (prévention VIH)  
+            - Garantir la **sécurité** des volontaires et des patients  
+            - Assurer la **qualité pharmaceutique** du produit  
+            - Obtenir et maintenir l’**AMM**  
+            - Assurer une **production industrielle** robuste et traçable  
+            - Gérer la **pharmacovigilance** et la fin de vie du produit
+            """
+        )
+
+    with col_arch:
+        st.subheader("Architecture logique")
+        st.markdown(
+            """
+            1. **Données d’entrée** : besoins médicaux, référentiels FDA/EMA, standards GxP  
+            2. **Bloc R&D** : préclinique, design produit, dossiers scientifiques  
+            3. **Bloc Clinique** : essais I–III, données de sécurité et d’efficacité  
+            4. **Bloc Qualité / Production** : CMC, GMP, libération lots, chaîne du froid  
+            5. **Bloc Réglementaire** : CTD, AMM, interactions autorités  
+            6. **Bloc Post-AMM** : PV, suivi efficacité réelle, archivage et change control
+            """
+        )
+
+        st.subheader("Schéma logique rapide")
+        graph_code = """
+        digraph G {
+            rankdir=LR;
+            node [shape=box, style=rounded];
+
+            Entree      [label="Besoins médicaux\\nRéférentiels FDA/EMA"];
+            RD          [label="R&D\\nPréclinique / Design"];
+            Clinique    [label="Clinique\\nEssais I–III"];
+            QualiteProd [label="Qualité / Production\\nCMC, GMP, Libération"];
+            Reglement   [label="Réglementaire\\nCTD, AMM"];
+            PostAMM     [label="Post-AMM\\nPV, archivage, change control"];
+
+            Entree -> RD -> Clinique -> QualiteProd -> Reglement -> PostAMM;
+        }
+        """
+        st.graphviz_chart(graph_code)
 
 # ===========================
 # METHODOLOGIE IVV

@@ -336,6 +336,109 @@ data_lifecycle = [
 ]
 
 df_lifecycle = pd.DataFrame(data_lifecycle)
+# Lifecycle in 8 steps used in the RFLP-IVV view (Hackathon report)
+data_lifecycle_rflp = [
+    {
+        "Ordre": 1,
+        "Étape": "Opportunité",
+        "Objectif": "Identifier le besoin médical, le marché et le cadre réglementaire.",
+        "Exemples": "Épidémiologie VIH, analyse marché, exigences FDA/EMA initiales.",
+    },
+    {
+        "Ordre": 2,
+        "Étape": "Concept",
+        "Objectif": "Définir la plateforme vaccinale et les grandes exigences précliniques.",
+        "Exemples": "Choix plateforme (ARN, vecteur viral), exigences de sécurité et d’immunogénicité préclinique.",
+    },
+    {
+        "Ordre": 3,
+        "Étape": "Design",
+        "Objectif": "Concevoir la formulation, la BOM et l’analyse de risques.",
+        "Exemples": "Formulation, structure de produit, analyse de risques (FMEA) et exigences de contrôle qualité.",
+    },
+    {
+        "Ordre": 4,
+        "Étape": "Ingénierie de fabrication",
+        "Objectif": "Préparer le MBOM, le process industriel et la conformité GMP.",
+        "Exemples": "MBOM, définition des procédés, qualification équipements, exigences GMP.",
+    },
+    {
+        "Ordre": 5,
+        "Étape": "Validation",
+        "Objectif": "Valider cliniquement et industriellement le vaccin.",
+        "Exemples": "Essais cliniques, validation de procédés, qualification de nettoyage, lots de validation.",
+    },
+    {
+        "Ordre": 6,
+        "Étape": "Production",
+        "Objectif": "Assurer la fabrication GMP, la libération des lots et la chaîne du froid.",
+        "Exemples": "Dossiers de lots, libération QA, suivi chaîne du froid, traçabilité.",
+    },
+    {
+        "Ordre": 7,
+        "Étape": "Usage",
+        "Objectif": "Gérer la distribution, la pharmacovigilance et la traçabilité terrain.",
+        "Exemples": "Distribution, PV, suivi des lots injectés, gestion des incidents qualité.",
+    },
+    {
+        "Ordre": 8,
+        "Étape": "Fin de vie",
+        "Objectif": "Gérer les déchets, le recyclage et les mises à jour produit.",
+        "Exemples": "Élimination déchets, retrait de lots, mise à jour de formulation ou RCP.",
+    },
+]
+
+df_lifecycle_rflp = pd.DataFrame(data_lifecycle_rflp)
+# Matrix linking the 4 pillars (Sécurité, Qualité, Efficacité, Production)
+# with the 8 lifecycle steps from the Hackathon report
+data_rflp_lifecycle = [
+    {
+        "Pilier": "Sécurité",
+        "Opportunité": "Identifier contraintes de sécurité VIH et attentes autorités.",
+        "Concept": "Définir exigences de sécurité préclinique et clinique.",
+        "Design": "Intégrer sécurité dans l’analyse de risques produit.",
+        "Ingénierie de fabrication": "Prendre en compte sécurité opérateurs / biosécurité.",
+        "Validation": "Monitorer effets indésirables, profil bénéfice/risque.",
+        "Production": "Assurer qualité des lots et gestion des déviations impactant la sécurité.",
+        "Usage": "Pharmacovigilance, signal detection, CAPA sécurité.",
+        "Fin de vie": "Gestion de retrait de lots, adaptation du produit.",
+    },
+    {
+        "Pilier": "Qualité",
+        "Opportunité": "Identifier référentiels qualité applicables (ICH, GMP).",
+        "Concept": "Définir exigences de qualité pour la plateforme vaccinale.",
+        "Design": "Concevoir CQ, spécifications, plan de stabilité.",
+        "Ingénierie de fabrication": "Définir process, contrôles en cours de fabrication.",
+        "Validation": "Valider méthodes analytiques et procédés.",
+        "Production": "Contrôles de routine, libération QA, chaîne du froid.",
+        "Usage": "Suivi stabilité sur le terrain, gestion OOS/OOT.",
+        "Fin de vie": "Archivage qualité, retour d’expérience, mise à jour des specs.",
+    },
+    {
+        "Pilier": "Efficacité",
+        "Opportunité": "Définir besoin en efficacité (variants, charge virale, immunité).",
+        "Concept": "Spécifier corrélats de protection et endpoints d’efficacité.",
+        "Design": "Intégrer efficacité dans design d’essais cliniques.",
+        "Ingénierie de fabrication": "Assurer que le process préserve l’antigénicité.",
+        "Validation": "Démontrer efficacité clinique (Phases II/III).",
+        "Production": "Maintenir consistance de l’efficacité entre lots.",
+        "Usage": "Suivi efficacité en vie réelle, études post-AMM.",
+        "Fin de vie": "Décision d’adapter ou retirer le produit selon efficacité.",
+    },
+    {
+        "Pilier": "Production",
+        "Opportunité": "Évaluer capacité industrielle, sites, partenaires.",
+        "Concept": "Choisir technologies de production et supply chain.",
+        "Design": "Concevoir BOM, MBOM, lignes pilotes.",
+        "Ingénierie de fabrication": "Industrialiser le process, qualification d’équipements.",
+        "Validation": "Valider capacité et robustesse industrielle.",
+        "Production": "Fabrication GMP, libération, supply chain.",
+        "Usage": "Approvisionnement continu, gestion pénuries.",
+        "Fin de vie": "Arrêt de production, transition vers nouveau produit.",
+    },
+]
+
+df_rflp_lifecycle = pd.DataFrame(data_rflp_lifecycle)
 
 data_archiving = [
     {
