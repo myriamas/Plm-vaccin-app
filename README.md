@@ -1,9 +1,9 @@
-# VAX-PLM — Digital Regulatory Twin (VAX-HIV-2030)
+# VAX-PLM - Digital Regulatory Twin (VAX-HIV-2030)
 
 ## Overview
 VAX-PLM is an interactive digital regulatory twin designed to model the complete Product Lifecycle Management (PLM) flow of a fictional vaccine: **VAX-HIV-2030**.
 
-The application centralizes all regulatory components — requirements, documents, evidence, quality, IoT monitoring, lifecycle, audit trail, and submission — to provide a unified and traceable view of regulatory compliance aligned with EMA and ANSM expectations.
+The application centralizes all regulatory components - requirements, documents, evidence, quality, IoT monitoring, lifecycle, audit trail, and submission - to provide a unified and traceable view of regulatory compliance aligned with EMA and ANSM expectations.
 
 This project illustrates how a full regulatory ecosystem can be organized, visualized, and navigated using a modern data application.
 
