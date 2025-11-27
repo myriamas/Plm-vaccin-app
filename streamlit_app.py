@@ -8,7 +8,6 @@ from dataset import (
 )
 import pandas as pd
 
-
 # ----- App config -----
 st.set_page_config(
     page_title="VAX-PLM – Jumeau réglementaire VIH",
@@ -58,19 +57,58 @@ def go_to(target: str) -> None:
     st.rerun()
 
 
-
-# ----- Sidebar navigation -----
+# ----- Sidebar : contexte uniquement, plus de menu radio -----
 st.sidebar.title("VAX-PLM – Jumeau réglementaire")
 st.sidebar.write("Projet vaccin VIH – VAX-HIV-2030")
-
-sidebar_choice = st.sidebar.radio(
-    "Navigation",
-    PAGES,
-    index=PAGES.index(st.session_state["page"]),
+st.sidebar.markdown(
+    "Jumeau réglementaire du vaccin fictif VAX-HIV-2030 : exigences, "
+    "documents, preuves, qualité, IoT, archivage et soumission EMA/ANSM."
 )
 
-if sidebar_choice != st.session_state["page"]:
-    st.session_state["page"] = sidebar_choice
+# ----- Barre de navigation horizontale -----
+
+# CSS pour transformer le radio en onglets propres
+st.markdown(
+    """
+    <style>
+    div[data-baseweb="radios"] {
+        display: flex;
+        gap: 0.5rem;
+        margin: 0.5rem 0 1.5rem 0;
+        padding-bottom: 0.5rem;
+        border-bottom: 1px solid #e0e0e0;
+        flex-wrap: wrap;
+    }
+    div[data-baseweb="radio"] input {
+        display: none;
+    }
+    div[data-baseweb="radio"] > label {
+        border-radius: 999px;
+        padding: 0.3rem 0.9rem;
+        border: 1px solid #d0d0d0;
+        background-color: #f7f7f7;
+        font-size: 0.9rem;
+        cursor: pointer;
+        white-space: nowrap;
+    }
+    div[data-baseweb="radio"] > label:hover {
+        border-color: #0f62fe;
+    }
+    </style>
+    """,
+    unsafe_allow_html=True,
+)
+
+nav_choice = st.radio(
+    "Navigation principale",
+    PAGES,
+    index=PAGES.index(st.session_state["page"]),
+    horizontal=True,
+    label_visibility="collapsed",
+)
+
+if nav_choice != st.session_state["page"]:
+    st.session_state["page"] = nav_choice
 
 page = st.session_state["page"]
 
@@ -157,7 +195,6 @@ elif page == "Vue d'ensemble":
         styled = df_view.style.applymap(color_statut, subset=["Statut"])
         st.dataframe(styled, use_container_width=True, hide_index=True)
 
-    # Navigation vers fiche détaillée à partir de la vue d'ensemble
     st.markdown("### Explorer une exigence en détail")
     if len(df) > 0:
         nom_sel = st.selectbox(
@@ -231,7 +268,6 @@ elif page == "Tableau des exigences":
 
     st.dataframe(df_view, use_container_width=True, hide_index=True)
 
-    # lien vers fiche détaillée
     nom_sel = st.selectbox(
         "Voir la fiche détaillée d'une exigence :", df_view["Nom"].tolist()
     )
@@ -288,14 +324,10 @@ elif page == "Qualité":
 
     quality = df_master[df_master["Type_exigence"] == "Qualité"].copy()
 
-    # tableau synthétique sans scroll horizontal
-    df_summary = quality[
-        ["Nom", "Phase", "Statut", "Process_qualite"]
-    ].reset_index(drop=True)
+    df_summary = quality[["Nom", "Phase", "Statut", "Process_qualite"]].reset_index(drop=True)
     st.subheader("Synthèse Qualité")
     st.dataframe(df_summary, use_container_width=True, hide_index=True)
 
-    # tous les détails dans un expander
     with st.expander("Afficher le détail complet Qualité (toutes les colonnes)"):
         df_full = quality[
             [
@@ -342,7 +374,42 @@ elif page == "IoT / Température":
 elif page == "Cycle de vie":
     st.title("Cycle de vie du vaccin – VAX-HIV-2030")
 
-    st.dataframe(df_lifecycle.reset_index(drop=True), use_container_width=True, hide_index=True)
+    st.markdown(
+        "Le cycle de vie est structuré en sept étapes, de la recherche fondamentale "
+        "jusqu'à la pharmacovigilance post-AMM."
+    )
+
+    df_steps = df_lifecycle.sort_values("Ordre")
+    cols = st.columns([1, 1, 1, 1, 1, 1, 1])
+
+    for col, (_, row) in zip(cols, df_steps.iterrows()):
+        with col:
+            st.markdown(
+                f"""
+                <div style="
+                    min-height: 180px;
+                    display: flex;
+                    flex-direction: column;
+                ">
+                    <strong>{row['Ordre']}. {row['Étape']}</strong>
+                    <div style="margin-top: 6px; font-size: 14px;">
+                        {row['Objectif']}
+                    </div>
+                </div>
+                """,
+                unsafe_allow_html=True,
+            )
+
+    st.markdown("---")
+
+    for _, row in df_steps.iterrows():
+        with st.expander(f"{row['Ordre']}. {row['Étape']}"):
+            st.write(f"**Objectif :** {row['Objectif']}")
+            st.write("**Principales activités :**")
+            st.write(row["Principales_activités"])
+            st.write("**Livrables clés :**")
+            st.write(row["Livrables"])
+            st.write(f"**Normes / référentiels :** {row['Normes']}")
 
 
 # ===========================
@@ -374,11 +441,11 @@ elif page == "Méthodologie IVV":
 
     st.markdown(
         """
-        - **Intégration** : relier exigences, change control, jumeau réglementaire et archivage  
+        - Intégration : relier exigences, change control, jumeau réglementaire et archivage  
           avec des identifiants communs et des rôles clairs.  
-        - **Vérification** : vérifier les règles GxP (Annexe 11, 21 CFR Part 11, intégrité des données) :  
+        - Vérification : vérifier les règles GxP (Annexe 11, 21 CFR Part 11, intégrité des données) :  
           audit trail, droits d'accès, cohérence des statuts.  
-        - **Validation** : rejouer des scénarios complets (Exigence → Changement → Document mis à jour  
+        - Validation : rejouer des scénarios complets (Exigence → Changement → Document mis à jour  
           → Preuve archivée) et montrer le résultat dans ce jumeau numérique.
         """
     )
@@ -425,10 +492,10 @@ elif page == "Soumission réglementaire":
     st.markdown(
         """
         - Procédure centralisée EMA (Règlement (CE) 726/2004)  
-        - Code communautaire des médicaments (Directive 2001/83/CE)  
+        - Code communautaire des médicaments (Directive 2001/83/EC)  
         - Dossier CTD complet : qualité, sécurité, efficacité  
         - Étapes nationales France (ANSM, HAS) et mise en place de la pharmacovigilance  
-        - Le jumeau réglementaire sert à montrer **où** se trouvent les documents et preuves
+        - Le jumeau réglementaire sert à montrer où se trouvent les documents et preuves
           associés à chaque exigence, en quelques clics.
         """
     )
